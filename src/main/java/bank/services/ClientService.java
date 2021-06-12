@@ -14,6 +14,14 @@ public class ClientService
     @Autowired
     ClientRepository clientRepository;
 
+    public void delete(Client client){
+        clientRepository.delete(client);
+    }
+
+    public  void deleteAll(List<Client> clients){
+        clientRepository.deleteAll(clients);
+    }
+
     public List<Client> getAll(){
         return clientRepository.findAll();
     }
@@ -24,6 +32,14 @@ public class ClientService
 
     public void save(Client client){
         clientRepository.save(client);
+    }
+
+    public void update(Client client){
+        if(client.getId()!=null && clientRepository.getOne(client.getId()).getId().equals(client.getId())){
+            clientRepository.delete(clientRepository.getOne(client.getId()));
+            clientRepository.save(client);
+        }
+        //TODO: выбросить эксепшн о том. что метод апдейт тут не подходит
     }
 }
 

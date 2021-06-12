@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Theme ("valo")
 @SpringUI
 @SpringViewDisplay
-public class Header extends UI implements ViewDisplay, Serializable
+public class BaseLayer extends UI implements ViewDisplay, Serializable
 {
     final VerticalLayout root = new VerticalLayout();
     private Panel springViewDisplay;

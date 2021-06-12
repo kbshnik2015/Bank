@@ -15,7 +15,7 @@
     <description>Demo project for Spring Boot</description>
     <properties>
         <java.version>1.8</java.version>
-        <vaadin.version>8.0.0</vaadin.version>
+        <vaadin.version>8.2.0</vaadin.version>
     </properties>
     <dependencies>
         <dependency>

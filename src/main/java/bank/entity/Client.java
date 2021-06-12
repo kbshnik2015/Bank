@@ -2,19 +2,19 @@ package bank.entity;
 
 import com.sun.istack.NotNull;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table (name = "CLIENTS")
 public class Client
 {
-    public Client()
-    {
-    }
 
     @Id
     @GeneratedValue (generator = "uuid2")
@@ -22,25 +22,25 @@ public class Client
     private UUID id;
 
     @NotNull
-    @Column(name = "NAME")
+    @Column
     private String name;
 
     @NotNull
-    @Column(name = "SURNAME")
+    @Column
     private String surname;
 
-    @Column(name = "PATRONYMIC")
+    @Column
     private String patronymic;
 
     @NotNull
-    @Column(name = "PHONE")
+    @Column
     private String phone;
 
     @NotNull
-    @Column(name = "EMAIL")
+    @Column
     private String email;
 
     @NotNull
-    @Column(name = "PASSPORT_NUMBER")
+    @Column
     private String passportNumber;
 }
