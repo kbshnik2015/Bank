@@ -1,16 +1,18 @@
 package bank.entity;
 
 import com.sun.istack.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.math.BigInteger;
-import java.util.UUID;
+import java.util.*;
 
-@Data
-@Table (name = "CREDIT")
+@Getter
+@Setter
+@Table (name = "CREDITS")
 @Entity
+
 public class Credit
 {
     @Id
@@ -19,13 +21,15 @@ public class Credit
     private UUID id;
 
     @NotNull
-    @Column (name = "LIMIT")
-    private float limit;
-
+    @Column
+    private double limit;
 
     @NotNull
-    @Column (name = "INSERT_RATE")
-    private float interestRate;
+    @Column
+    private double percent;
+
+   @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<Bank> banks = new HashSet<>();
 
 
 }

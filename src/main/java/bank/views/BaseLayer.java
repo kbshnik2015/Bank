@@ -27,7 +27,7 @@ public class BaseLayer extends UI implements ViewDisplay, Serializable
         HorizontalLayout buttons = new HorizontalLayout();
         buttons.addComponent(createNavigationButton("Credits",""));
         buttons.addComponent(createNavigationButton("Clients","Clients"));
-        buttons.addComponent(createNavigationButton("Banks","Bank"));
+        buttons.addComponent(createNavigationButton("Banks","Banks"));
         buttons.addComponent(createNavigationButton("Credit offers","Credit_offer"));
         springViewDisplay = new Panel();
         springViewDisplay.setSizeFull();
