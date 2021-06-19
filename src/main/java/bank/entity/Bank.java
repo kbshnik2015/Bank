@@ -30,7 +30,10 @@ public class Bank
             inverseJoinColumns={@JoinColumn(name="client_id")})
     private Set<Client> clients ;
 
-    @ManyToMany(mappedBy = "banks", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable (name="bank_credits",
+            joinColumns={@JoinColumn (name="bank_id")},
+            inverseJoinColumns={@JoinColumn(name="credit_id")})
     private Set<Credit> credits ;
 
     public String getClientsString(){
@@ -42,7 +45,7 @@ public class Bank
                     .append(client.getName())
                     .append(" ")
                     .append(client.getPatronymic())
-                    .append("\n");
+                    .append(";");
         }
         return stringForView.toString();
     }
@@ -51,12 +54,11 @@ public class Bank
         StringBuilder stringForView = new StringBuilder();
         for (Credit credit:credits)
         {
-            stringForView.append("limit:")
-                    .append(" ")
+            stringForView.append("limit: ")
                     .append(credit.getLimit())
                     .append(", percent")
                     .append(credit.getPercent())
-                    .append("\n");
+                    .append(";");
         }
         return stringForView.toString();
     }

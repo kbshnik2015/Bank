@@ -2,6 +2,7 @@ package bank.services;
 
 import bank.entity.Bank;
 import bank.entity.Client;
+import bank.entity.Credit;
 import bank.repositories.BankRepository;
 import bank.repositories.ClientRepository;
 import org.hibernate.type.UUIDCharType;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 

@@ -16,7 +16,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@SpringView (name = "")
+@SpringView (name = "Credits")
 public class CreditPage extends VerticalLayout implements View, Serializable
 {
     @Autowired

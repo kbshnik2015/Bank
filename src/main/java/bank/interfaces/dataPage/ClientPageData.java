@@ -32,4 +32,6 @@ public interface ClientPageData
     String ERROR_PASSPORT_NUMBER_NOTIFICATION = "The entered passport number  is incorrect";
     String CANCEL = "cancel";
     String BANKS = "Available banks";
+    String SHOW_LIST_OF_BANKS = "Show list of banks";
+    String LIST_OF_BANKS_CAPTION = "List of banks";
 }

@@ -1,10 +1,14 @@
 package bank.views;
 
 import bank.entity.Bank;
+import bank.entity.Client;
+import bank.entity.Credit;
 import bank.interfaces.dataPage.BankPageData;
+import bank.interfaces.dataPage.ClientPageData;
 import bank.interfaces.dataPage.CreditPageData;
 import bank.interfaces.regExp.BankRegExp;
 import bank.services.BankService;
+import bank.services.CreditService;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.SpringView;
@@ -22,11 +26,18 @@ public class BankPage extends VerticalLayout implements View, Serializable
     @Autowired
     BankService bankService;
 
+    @Autowired
+    CreditService creditService;
+
     private Grid<Bank> grid;
     private Button editBankButton;
     private Button deleteBankButton;
+    private Button showListOfClients;
+    private Button showListOfCredits;
     private List<Bank> selected;
 
+
+    //TODO: изменить валидатор имени банка
     @PostConstruct
     void init()
     {
@@ -53,6 +64,8 @@ public class BankPage extends VerticalLayout implements View, Serializable
             selected = new ArrayList<>(event.getAllSelectedItems());
             deleteBankButton.setEnabled(selected.size() > 0);
             editBankButton.setEnabled(selected.size() == 1);
+            showListOfClients.setEnabled(selected.size() == 1);
+            showListOfCredits.setEnabled(selected.size() == 1);
         });
         addComponents(grid);
     }
@@ -69,11 +82,63 @@ public class BankPage extends VerticalLayout implements View, Serializable
         deleteBankButton = new Button(BankPageData.BUTTONS_PANEL_DELETE_BUTTON,
                 clickEvent -> getUI().addWindow(createWindowForDeleteBanks(selected))
         );
+        showListOfClients = new Button(BankPageData.SHOW_CLIENTS_PANEL_BUTTON, clickEvent -> getUI().addWindow(createWindowForClientsList(selected.get(0))));
+        showListOfCredits = new Button(BankPageData.SHOW_CREDITS_PANEL_BUTTON, clickEvent -> getUI().addWindow(createWindowForCreditList(selected.get(0))));
         createCreditButton.setEnabled(true);
         editBankButton.setEnabled(false);
         deleteBankButton.setEnabled(false);
-        buttonsPanel.addComponents(createCreditButton, editBankButton, deleteBankButton);
+        showListOfClients.setEnabled(false);
+        showListOfCredits.setEnabled(false);
+        buttonsPanel.addComponents(createCreditButton, editBankButton, deleteBankButton, showListOfClients, showListOfCredits);
         addComponent(buttonsPanel);
+    }
+
+    private Window createWindowForCreditList(Bank bank)
+    {
+        Window window = new Window();
+        Grid<Credit> creditGrid = new Grid<>();
+        HorizontalLayout main = new HorizontalLayout();
+        creditGrid.setItems(bank.getCredits());
+        creditGrid.removeAllColumns();
+        creditGrid.setWidth("100%");
+        creditGrid.addColumn(Credit :: getLimit)
+                .setCaption(CreditPageData.LIMIT);
+        creditGrid.addColumn(Credit :: getPercent)
+                .setCaption(CreditPageData.PERCENT);
+        main.addComponents(creditGrid);
+        window.setContent(main);
+        window.setCaption(BankPageData.CREDITS_LIST_WINDOW);
+        window.setModal(true);
+        window.center();
+        return window;
+    }
+
+    private Window createWindowForClientsList(Bank bank)
+    {
+        Window window = new Window();
+        Grid<Client> clientsGrid = new Grid<>();
+        HorizontalLayout main = new HorizontalLayout();
+        clientsGrid.setItems(bank.getClients());
+        clientsGrid.removeAllColumns();
+        clientsGrid.setWidth("100%");
+        clientsGrid.addColumn(Client :: getName)
+                .setCaption(ClientPageData.NAME);
+        clientsGrid.addColumn(Client :: getSurname)
+                .setCaption(ClientPageData.SURNAME);
+        clientsGrid.addColumn(Client :: getPatronymic)
+                .setCaption(ClientPageData.PATRONYMIC);
+        clientsGrid.addColumn(Client :: getPhone)
+                .setCaption(ClientPageData.PHONE);
+        clientsGrid.addColumn(Client :: getEmail)
+                .setCaption(ClientPageData.EMAIL);
+        clientsGrid.addColumn(Client :: getPassportNumber)
+                .setCaption(ClientPageData.PASSPORT_NUMBER);
+        main.addComponents(clientsGrid);
+        window.setContent(main);
+        window.setCaption(BankPageData.CLIENTS_LIST_WINDOW);
+        window.setModal(true);
+        window.center();
+        return window;
     }
 
     private Window createWindowForCreatingOrEditBank(Bank bank)
@@ -92,6 +157,8 @@ public class BankPage extends VerticalLayout implements View, Serializable
             name = new TextField(BankPageData.NAME);
         }
         name.setRequiredIndicatorVisible(true);
+        CheckBoxGroup<Credit> creditCheckBox = new CheckBoxGroup<>("Chose banks", creditService.getAll());
+        creditCheckBox.setItemCaptionGenerator(item -> "Limit: " +item.getLimit()+", percent: "+item.getPercent()+";");
         HorizontalLayout buttonsRow = new HorizontalLayout();
         Button saveButton = new Button(BankPageData.SAVE_BUTTON, clickEvent -> {
             if (!isValidName(name.getValue()))
@@ -103,14 +170,9 @@ public class BankPage extends VerticalLayout implements View, Serializable
             }else
             {
                 bank.setName(name.getValue());
-                if (bank.getId() != null)
-                {
-                    bankService.update(bank);
-                }
-                else
-                {
-                    bankService.save(bank);
-                }
+                bank.setCredits(creditCheckBox.getSelectedItems());
+                bankService.save(bank);
+
                 grid.setItems(bankService.getAll());
                 getUI().removeWindow(window);
             }
@@ -118,7 +180,7 @@ public class BankPage extends VerticalLayout implements View, Serializable
 
         Button cancelButton = new Button(BankPageData.CANCEL, clickEvent -> getUI().removeWindow(window));
         buttonsRow.addComponents(saveButton, cancelButton);
-        mine.addComponents(name, buttonsRow);
+        mine.addComponents(name,creditCheckBox, buttonsRow);
         setCaption("Crating bank");
         window.setContent(mine);
         window.setModal(true);

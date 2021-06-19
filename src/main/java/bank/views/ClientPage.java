@@ -3,7 +3,10 @@ package bank.views;
 
 import bank.entity.Bank;
 import bank.entity.Client;
+import bank.entity.Credit;
+import bank.interfaces.dataPage.BankPageData;
 import bank.interfaces.dataPage.ClientPageData;
+import bank.interfaces.dataPage.CreditPageData;
 import bank.interfaces.regExp.ClientRegExp;
 import bank.services.BankService;
 import bank.services.ClientService;
@@ -35,6 +38,7 @@ public class ClientPage extends VerticalLayout implements View
     private Grid<Client> grid;
     private Button editClientButton;
     private Button deleteClientsButton;
+    private Button showListOfBanks;
     private List<Client> selected;
 
     @PostConstruct
@@ -71,12 +75,14 @@ public class ClientPage extends VerticalLayout implements View
             selected = new ArrayList<>(event.getAllSelectedItems());
             deleteClientsButton.setEnabled(selected.size() > 0);
             editClientButton.setEnabled(selected.size() == 1);
+            showListOfBanks.setEnabled(selected.size() == 1);
         });
         addComponents(grid);
     }
 
     private void configureButtons()
     {
+
         HorizontalLayout buttonsPanel = new HorizontalLayout();
         Button createClientButton = new Button(ClientPageData.BUTTONS_PANEL_CREATE_BUTTON,
                 clickEvent -> getUI().addWindow(createWindowForCreatingOrEditClient(new Client()))
@@ -87,11 +93,31 @@ public class ClientPage extends VerticalLayout implements View
         deleteClientsButton = new Button(ClientPageData.BUTTONS_PANEL_DELETE_BUTTON,
                 clickEvent -> getUI().addWindow(createWindowForDeleteClients(selected))
         );
+        showListOfBanks = new Button(ClientPageData.SHOW_LIST_OF_BANKS, clickEvent -> getUI().addWindow(createWindowForBanksList(selected.get(0))));
         createClientButton.setEnabled(true);
+        showListOfBanks.setEnabled(false);
         editClientButton.setEnabled(false);
         deleteClientsButton.setEnabled(false);
-        buttonsPanel.addComponents(createClientButton, editClientButton, deleteClientsButton);
+        buttonsPanel.addComponents(createClientButton, editClientButton, deleteClientsButton,showListOfBanks);
         addComponent(buttonsPanel);
+    }
+
+    private Window createWindowForBanksList(Client client)
+    {
+        Window window = new Window();
+        Grid<Bank> bankGrid = new Grid<>();
+        HorizontalLayout main = new HorizontalLayout();
+        bankGrid.setItems(client.getClientBanks());
+        bankGrid.removeAllColumns();
+        bankGrid.setWidth("100%");
+        bankGrid.addColumn(Bank :: getName)
+                .setCaption(BankPageData.NAME);
+        main.addComponents(bankGrid);
+        window.setContent(main);
+        window.setCaption(ClientPageData.LIST_OF_BANKS_CAPTION);
+        window.setModal(true);
+        window.center();
+        return window;
     }
 
     private Window createWindowForDeleteClients(List<Client> selected)

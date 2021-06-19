@@ -28,7 +28,10 @@ public class Credit
     @Column
     private double percent;
 
-   @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable (name="bank_credits",
+            joinColumns={@JoinColumn (name="credit_id")},
+            inverseJoinColumns={@JoinColumn(name="bank_id")})
     private Set<Bank> banks = new HashSet<>();
 
 
