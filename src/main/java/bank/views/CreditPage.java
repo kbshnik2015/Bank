@@ -1,14 +1,18 @@
 package bank.views;
 
 
+import bank.entity.Bank;
 import bank.entity.Credit;
 import bank.interfaces.dataPage.CreditPageData;
 import bank.interfaces.regExp.CreditRegExp;
+import bank.services.BankService;
 import bank.services.CreditService;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.*;
+import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -16,11 +20,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@SpringView (name = "Credits")
+@SpringView (name = "Credit_offers")
 public class CreditPage extends VerticalLayout implements View, Serializable
 {
     @Autowired
     CreditService creditService;
+    @Autowired
+    BankService bankService;
 
     private Grid<Credit> grid;
     private Button editCreditButton;
@@ -46,6 +52,8 @@ public class CreditPage extends VerticalLayout implements View, Serializable
                 .setCaption(CreditPageData.LIMIT);
         grid.addColumn(Credit :: getPercent)
                 .setCaption(CreditPageData.PERCENT);
+        grid.addColumn(this :: getNameOfBank)
+                .setCaption(CreditPageData.BANK);
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.addSelectionListener(event -> {
             selected = new ArrayList<>(event.getAllSelectedItems());
@@ -58,15 +66,27 @@ public class CreditPage extends VerticalLayout implements View, Serializable
     private void configureButtons()
     {
         HorizontalLayout buttonsPanel = new HorizontalLayout();
-        Button createCreditButton = new Button(CreditPageData.BUTTONS_PANEL_CREATE_BUTTON,
-                clickEvent -> getUI().addWindow(createWindowForCreatingOrEditCredit(new Credit()))
+        Button createCreditButton = new Button(
+                CreditPageData.BUTTONS_PANEL_CREATE_BUTTON,
+                clickEvent -> getUI().addWindow(createWindowForCreatingOrEditingCredit(new Credit()))
         );
-        editCreditButton = new Button(CreditPageData.BUTTONS_PANEL_EDIT_BUTTON,
-                clickEvent -> getUI().addWindow(createWindowForCreatingOrEditCredit(selected.get(0)))
+        createCreditButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+        createCreditButton.setIcon(VaadinIcons.PLUS);
+
+        editCreditButton = new Button(
+                CreditPageData.BUTTONS_PANEL_EDIT_BUTTON,
+                clickEvent -> getUI().addWindow(createWindowForCreatingOrEditingCredit(selected.get(0)))
         );
-        deleteCreditButton = new Button(CreditPageData.BUTTONS_PANEL_DELETE_BUTTON,
-                clickEvent -> getUI().addWindow(createWindowForDeleteClients(selected))
+        editCreditButton.setIcon(VaadinIcons.PENCIL);
+        editCreditButton.setStyleName(ValoTheme.BUTTON_PRIMARY);
+
+        deleteCreditButton = new Button(
+                CreditPageData.BUTTONS_PANEL_DELETE_BUTTON,
+                clickEvent -> getUI().addWindow(createWindowForDeleteCredits())
         );
+        deleteCreditButton.setStyleName(ValoTheme.BUTTON_DANGER);
+        deleteCreditButton.setIcon(VaadinIcons.MINUS);
+
         createCreditButton.setEnabled(true);
         editCreditButton.setEnabled(false);
         deleteCreditButton.setEnabled(false);
@@ -74,23 +94,28 @@ public class CreditPage extends VerticalLayout implements View, Serializable
         addComponent(buttonsPanel);
     }
 
-    private Window createWindowForCreatingOrEditCredit(Credit credit)
+    private Window createWindowForCreatingOrEditingCredit(Credit credit)
     {
         Window window = new Window();
         VerticalLayout mine = new VerticalLayout();
         TextField limit;
         TextField percent;
-
+        NativeSelect<Bank> selectBank;
+        List<Bank> banks = bankService.getAll();
+        selectBank = new NativeSelect<>(CreditPageData.SELECT_BANK, banks);
+        selectBank.setEmptySelectionAllowed(true);
         if (credit.getId() != null)
         {
             limit = new TextField(CreditPageData.LIMIT, String.valueOf(credit.getLimit()));
             percent = new TextField(CreditPageData.PERCENT, String.valueOf(credit.getPercent()));
+
         }
         else
         {
             limit = new TextField(CreditPageData.LIMIT);
             percent = new TextField(CreditPageData.PERCENT);
         }
+        selectBank.setSelectedItem(selectBank.getEmptyValue());
         limit.setRequiredIndicatorVisible(true);
         percent.setRequiredIndicatorVisible(true);
         HorizontalLayout buttonsRow = new HorizontalLayout();
@@ -113,22 +138,17 @@ public class CreditPage extends VerticalLayout implements View, Serializable
             {
                 credit.setLimit(Double.parseDouble(limit.getValue()));
                 credit.setPercent(Double.parseDouble(percent.getValue()));
-                if (credit.getId() != null)
-                {
-                    creditService.update(credit);
-                }
-                else
-                {
-                    creditService.save(credit);
-                }
+                credit.setBank(selectBank.getValue());
+                creditService.save(credit);
                 grid.setItems(creditService.getAll());
                 getUI().removeWindow(window);
             }
         });
-
+        saveButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
         Button cancelButton = new Button(CreditPageData.CANCEL, clickEvent -> getUI().removeWindow(window));
+        cancelButton.setStyleName(ValoTheme.BUTTON_DANGER);
         buttonsRow.addComponents(saveButton, cancelButton);
-        mine.addComponents(limit, percent, buttonsRow);
+        mine.addComponents(selectBank, limit, percent, buttonsRow);
         setCaption("Crating credit");
         window.setContent(mine);
         window.setModal(true);
@@ -136,7 +156,7 @@ public class CreditPage extends VerticalLayout implements View, Serializable
         return window;
     }
 
-    private Window createWindowForDeleteClients(List<Credit> selected)
+    private Window createWindowForDeleteCredits()
     {
         Window window = new Window();
         VerticalLayout main = new VerticalLayout();
@@ -147,12 +167,15 @@ public class CreditPage extends VerticalLayout implements View, Serializable
             grid.setItems(creditService.getAll());
             getUI().removeWindow(window);
         });
+        positiveAnswer.setStyleName(ValoTheme.BUTTON_DANGER);
         Button negativeAnswer =
                 new Button(CreditPageData.DELETE_WINDOW_NEGATIVE_ANSWER, clickEvent -> getUI().removeWindow(window));
+        negativeAnswer.setStyleName(ValoTheme.BUTTON_PRIMARY);
         answerButtons.addComponents(positiveAnswer, negativeAnswer);
         main.addComponents(question, answerButtons);
         window.setContent(main);
         window.setModal(true);
+        window.setWidth("35%");
         window.center();
         return window;
     }
@@ -165,6 +188,19 @@ public class CreditPage extends VerticalLayout implements View, Serializable
     private boolean isValidLimit(String limit)
     {
         return limit.matches(CreditRegExp.LIMIT_REGEXP);
+    }
+
+    private String getNameOfBank(Credit credit)
+    {
+        if (credit.getBank() == null)
+        {
+            return "";
+        }
+        else
+        {
+            return credit.getBank()
+                    .getName();
+        }
     }
 
 

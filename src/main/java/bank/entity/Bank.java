@@ -24,17 +24,14 @@ public class Bank
     @NotNull
     private String name;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE , CascadeType.REMOVE})
     @JoinTable (name="bank_clients",
             joinColumns={@JoinColumn (name="bank_id")},
             inverseJoinColumns={@JoinColumn(name="client_id")})
     private Set<Client> clients ;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable (name="bank_credits",
-            joinColumns={@JoinColumn (name="bank_id")},
-            inverseJoinColumns={@JoinColumn(name="credit_id")})
-    private Set<Credit> credits ;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "bank", cascade = {CascadeType.MERGE , CascadeType.REMOVE})
+    private Set<Credit> credits;
 
     public String getClientsString(){
         StringBuilder stringForView = new StringBuilder();
@@ -63,4 +60,9 @@ public class Bank
         return stringForView.toString();
     }
 
+    @Override
+    public String toString()
+    {
+        return  name;
+    }
 }

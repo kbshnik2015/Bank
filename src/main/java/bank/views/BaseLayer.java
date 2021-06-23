@@ -18,6 +18,12 @@ public class BaseLayer extends UI implements ViewDisplay, Serializable
     final VerticalLayout root = new VerticalLayout();
     private Panel springViewDisplay;
 
+    private final Button makeCredit = createNavigationButton("Make a credit","");
+    private final Button creditOffers =createNavigationButton("Credit offers","Credit_offers");
+    private final Button clients = createNavigationButton("Clients","Clients");
+    private final Button banks = createNavigationButton("Banks","Banks");
+    private final Button creditHistory = createNavigationButton("Credit history",  "Credit_history");
+
     @Override
     protected void init(VaadinRequest vaadinRequest)
     {
@@ -25,10 +31,12 @@ public class BaseLayer extends UI implements ViewDisplay, Serializable
         setContent(root);
 
         HorizontalLayout buttons = new HorizontalLayout();
-        buttons.addComponent(createNavigationButton("Apply for a loan",""));
-        buttons.addComponent(createNavigationButton("Credits","Credits"));
-        buttons.addComponent(createNavigationButton("Clients","Clients"));
-        buttons.addComponent(createNavigationButton("Banks","Banks"));
+
+        buttons.addComponent(makeCredit);
+        buttons.addComponent(creditOffers);
+        buttons.addComponent(clients);
+        buttons.addComponent(banks);
+        buttons.addComponent(creditHistory);
         springViewDisplay = new Panel();
         springViewDisplay.setSizeFull();
 
@@ -40,10 +48,12 @@ public class BaseLayer extends UI implements ViewDisplay, Serializable
 
     private Button createNavigationButton(String caption, final String path) {
         Button button = new Button(caption);
-        button.addStyleName(ValoTheme.BUTTON_LARGE);
+        button.addStyleName(ValoTheme.BUTTON_QUIET);
         button.addClickListener(event -> getUI().getNavigator().navigateTo(path));
         return button;
     }
+
+
 
     @Override
     public void showView(View view)

@@ -2,6 +2,7 @@ package bank.services;
 
 import bank.entity.Bank;
 import bank.entity.Client;
+import bank.entity.Credit;
 import bank.repositories.BankRepository;
 import bank.repositories.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,8 @@ public class BankService
         bankRepository.delete(bank);
     }
 
-    public  void deleteAll(List<Bank> clients){
-        bankRepository.deleteAll(clients);
+    public  void deleteAll(List<Bank> banks){
+        bankRepository.deleteAll(banks);
     }
 
     public List<Bank> getAll(){
@@ -36,16 +37,17 @@ public class BankService
         bankRepository.save(client);
     }
 
-    public void update(Bank client){
-        if(client.getId()!=null && bankRepository.getOne(client.getId()).getId().equals(client.getId())){
-            bankRepository.delete(bankRepository.getOne(client.getId()));
-            bankRepository.save(client);
-        }
+
+    public void addCredit(UUID bankId, Credit credit){
+        Bank bank = getOne(bankId);
+        bank.getCredits().add(credit);
+        save(bank);
     }
 
-    public void removeClientFromBank(Client client, UUID bankId){
+    public void removeCredit(UUID bankId, Credit credit){
         Bank bank = getOne(bankId);
-        bank.getClients().remove(client);
-        bankRepository.save(bank);
+        bank.getCredits().remove(credit);
+        save(bank);
     }
+
 }

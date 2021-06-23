@@ -2,17 +2,12 @@ package bank.services;
 
 import bank.entity.Bank;
 import bank.entity.Client;
-import bank.entity.Credit;
-import bank.repositories.BankRepository;
 import bank.repositories.ClientRepository;
-import org.hibernate.type.UUIDCharType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -45,13 +40,13 @@ public class ClientService
     @Transactional
     public void removeBank(UUID clientId,Bank bank){
             Client client = getOne(clientId);
-            client.getClientBanks().remove(bank);
+            client.getBanks().remove(bank);
     }
 
     @Transactional
     public void removeAllBank(UUID clientId){
         Client client = getOne(clientId);
-        client.getClientBanks().removeAll(client.getClientBanks());
+        client.getBanks().removeAll(client.getBanks());
         save(client);
     }
 

@@ -4,7 +4,6 @@ import com.sun.istack.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -50,10 +49,13 @@ public class Client
     @JoinTable(name="bank_clients",
             joinColumns={@JoinColumn(name="client_id")},
             inverseJoinColumns={@JoinColumn(name="bank_id")})
-    private Set<Bank> clientBanks = new HashSet<>();
+    private Set<Bank> banks = new HashSet<>();
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "client", cascade ={ CascadeType.MERGE, CascadeType.REMOVE })
+    private Set<CreditOffer> creditOffers;
 
     public String getStringBanks() {
-        Set<Bank> banks = getClientBanks();
+        Set<Bank> banks = getBanks();
         StringBuilder stringForView = new StringBuilder();
         for (Bank bank:banks)
         {
@@ -62,6 +64,15 @@ public class Client
                     .append("\n");
         }
         return String.valueOf(stringForView);
+    }
+
+    @Override
+    public String toString() {
+        return
+                this.name +" "+ this.surname +" "+ this.patronymic  +"; "+
+                        " Phone: "  + this.phone  +"; "+
+                        " E-mail: " + this.email  +"; "+
+                        " Passport number: " + this.passportNumber +";";
     }
 
 }

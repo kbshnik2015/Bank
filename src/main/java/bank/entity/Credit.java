@@ -28,11 +28,16 @@ public class Credit
     @Column
     private double percent;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable (name="bank_credits",
-            joinColumns={@JoinColumn (name="credit_id")},
-            inverseJoinColumns={@JoinColumn(name="bank_id")})
-    private Set<Bank> banks = new HashSet<>();
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinColumn(name = "bank_id", nullable = false)
+    private Bank bank;
 
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "credit", cascade ={ CascadeType.MERGE, CascadeType.REMOVE })
+    private Set<CreditOffer> creditOffers;
 
+    @Override
+    public String toString()
+    {
+        return "Bank: "+bank.getName()+", limit: "+ limit+", percent: "+percent;
+    }
 }

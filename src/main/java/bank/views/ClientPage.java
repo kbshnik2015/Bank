@@ -3,10 +3,8 @@ package bank.views;
 
 import bank.entity.Bank;
 import bank.entity.Client;
-import bank.entity.Credit;
 import bank.interfaces.dataPage.BankPageData;
 import bank.interfaces.dataPage.ClientPageData;
-import bank.interfaces.dataPage.CreditPageData;
 import bank.interfaces.regExp.ClientRegExp;
 import bank.services.BankService;
 import bank.services.ClientService;
@@ -16,9 +14,11 @@ import bank.validators.clientValidators.PatronymicValidator;
 import bank.validators.clientValidators.PhoneValidator;
 import com.vaadin.data.Binder;
 import com.vaadin.data.validator.EmailValidator;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.*;
+import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -87,12 +87,21 @@ public class ClientPage extends VerticalLayout implements View
         Button createClientButton = new Button(ClientPageData.BUTTONS_PANEL_CREATE_BUTTON,
                 clickEvent -> getUI().addWindow(createWindowForCreatingOrEditClient(new Client()))
         );
+        createClientButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+        createClientButton.setIcon(VaadinIcons.PLUS);
+
         editClientButton = new Button(ClientPageData.BUTTONS_PANEL_EDIT_BUTTON,
                 clickEvent -> getUI().addWindow(createWindowForCreatingOrEditClient(selected.get(0)))
         );
+        editClientButton.setIcon(VaadinIcons.PENCIL);
+        editClientButton.setStyleName(ValoTheme.BUTTON_PRIMARY);
+
         deleteClientsButton = new Button(ClientPageData.BUTTONS_PANEL_DELETE_BUTTON,
                 clickEvent -> getUI().addWindow(createWindowForDeleteClients(selected))
         );
+        deleteClientsButton.setStyleName(ValoTheme.BUTTON_DANGER);
+        deleteClientsButton.setIcon(VaadinIcons.MINUS);
+
         showListOfBanks = new Button(ClientPageData.SHOW_LIST_OF_BANKS, clickEvent -> getUI().addWindow(createWindowForBanksList(selected.get(0))));
         createClientButton.setEnabled(true);
         showListOfBanks.setEnabled(false);
@@ -107,7 +116,7 @@ public class ClientPage extends VerticalLayout implements View
         Window window = new Window();
         Grid<Bank> bankGrid = new Grid<>();
         HorizontalLayout main = new HorizontalLayout();
-        bankGrid.setItems(client.getClientBanks());
+        bankGrid.setItems(client.getBanks());
         bankGrid.removeAllColumns();
         bankGrid.setWidth("100%");
         bankGrid.addColumn(Bank :: getName)
@@ -131,11 +140,13 @@ public class ClientPage extends VerticalLayout implements View
             grid.setItems(clientService.getAll());
             getUI().removeWindow(window);
         });
-        Button negativeAnswer =
-                new Button(ClientPageData.DELETE_WINDOW_NEGATIVE_ANSWER, clickEvent -> getUI().removeWindow(window));
+        positiveAnswer.setStyleName(ValoTheme.BUTTON_DANGER);
+        Button negativeAnswer = new Button(ClientPageData.DELETE_WINDOW_NEGATIVE_ANSWER, clickEvent -> getUI().removeWindow(window));
+        negativeAnswer.setStyleName(ValoTheme.BUTTON_PRIMARY);
         answerButtons.addComponents(positiveAnswer, negativeAnswer);
         main.addComponents(question, answerButtons);
         window.setContent(main);
+        window.setWidth("35%");
         window.setModal(true);
         window.center();
         return window;
@@ -244,7 +255,7 @@ public class ClientPage extends VerticalLayout implements View
                 client.setPhone(phone.getValue());
                 client.setEmail(email.getValue());
                 client.setPassportNumber(passportNumber.getValue());
-                client.setClientBanks(bankCheckBox.getSelectedItems());// ошибка тут !
+                client.setBanks(bankCheckBox.getSelectedItems());// ошибка тут !
                 clientService.save(client);
 
                 grid.setItems(clientService.getAll());

@@ -1,0 +1,11 @@
+node_modules
+HELP.md
+target/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+.out/
+*.class

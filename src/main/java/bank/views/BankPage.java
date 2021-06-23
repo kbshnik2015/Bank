@@ -9,10 +9,12 @@ import bank.interfaces.dataPage.CreditPageData;
 import bank.interfaces.regExp.BankRegExp;
 import bank.services.BankService;
 import bank.services.CreditService;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.*;
+import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -37,7 +39,6 @@ public class BankPage extends VerticalLayout implements View, Serializable
     private List<Bank> selected;
 
 
-    //TODO: изменить валидатор имени банка
     @PostConstruct
     void init()
     {
@@ -76,12 +77,21 @@ public class BankPage extends VerticalLayout implements View, Serializable
         Button createCreditButton = new Button(BankPageData.BUTTONS_PANEL_CREATE_BUTTON,
                 clickEvent -> getUI().addWindow(createWindowForCreatingOrEditBank(new Bank()))
         );
+        createCreditButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+        createCreditButton.setIcon(VaadinIcons.PLUS);
+
         editBankButton = new Button(BankPageData.BUTTONS_PANEL_EDIT_BUTTON,
                 clickEvent -> getUI().addWindow(createWindowForCreatingOrEditBank(selected.get(0)))
         );
+        editBankButton.setIcon(VaadinIcons.PENCIL);
+        editBankButton.setStyleName(ValoTheme.BUTTON_PRIMARY);
+
         deleteBankButton = new Button(BankPageData.BUTTONS_PANEL_DELETE_BUTTON,
-                clickEvent -> getUI().addWindow(createWindowForDeleteBanks(selected))
+                clickEvent -> getUI().addWindow(createWindowForDeleteBanks())
         );
+        deleteBankButton.setStyleName(ValoTheme.BUTTON_DANGER);
+        deleteBankButton.setIcon(VaadinIcons.MINUS);
+
         showListOfClients = new Button(BankPageData.SHOW_CLIENTS_PANEL_BUTTON, clickEvent -> getUI().addWindow(createWindowForClientsList(selected.get(0))));
         showListOfCredits = new Button(BankPageData.SHOW_CREDITS_PANEL_BUTTON, clickEvent -> getUI().addWindow(createWindowForCreditList(selected.get(0))));
         createCreditButton.setEnabled(true);
@@ -120,7 +130,7 @@ public class BankPage extends VerticalLayout implements View, Serializable
         HorizontalLayout main = new HorizontalLayout();
         clientsGrid.setItems(bank.getClients());
         clientsGrid.removeAllColumns();
-        clientsGrid.setWidth("100%");
+
         clientsGrid.addColumn(Client :: getName)
                 .setCaption(ClientPageData.NAME);
         clientsGrid.addColumn(Client :: getSurname)
@@ -133,6 +143,7 @@ public class BankPage extends VerticalLayout implements View, Serializable
                 .setCaption(ClientPageData.EMAIL);
         clientsGrid.addColumn(Client :: getPassportNumber)
                 .setCaption(ClientPageData.PASSPORT_NUMBER);
+        clientsGrid.setSizeFull();
         main.addComponents(clientsGrid);
         window.setContent(main);
         window.setCaption(BankPageData.CLIENTS_LIST_WINDOW);
@@ -151,14 +162,14 @@ public class BankPage extends VerticalLayout implements View, Serializable
         if (bank.getId() != null)
         {
             name = new TextField(BankPageData.NAME, String.valueOf(bank.getName()));
+            window.setCaption("Edit bank");
         }
         else
         {
             name = new TextField(BankPageData.NAME);
+            window.setCaption("Create bank");
         }
         name.setRequiredIndicatorVisible(true);
-        CheckBoxGroup<Credit> creditCheckBox = new CheckBoxGroup<>("Chose banks", creditService.getAll());
-        creditCheckBox.setItemCaptionGenerator(item -> "Limit: " +item.getLimit()+", percent: "+item.getPercent()+";");
         HorizontalLayout buttonsRow = new HorizontalLayout();
         Button saveButton = new Button(BankPageData.SAVE_BUTTON, clickEvent -> {
             if (!isValidName(name.getValue()))
@@ -170,25 +181,25 @@ public class BankPage extends VerticalLayout implements View, Serializable
             }else
             {
                 bank.setName(name.getValue());
-                bank.setCredits(creditCheckBox.getSelectedItems());
                 bankService.save(bank);
 
                 grid.setItems(bankService.getAll());
                 getUI().removeWindow(window);
             }
         });
+        saveButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
 
         Button cancelButton = new Button(BankPageData.CANCEL, clickEvent -> getUI().removeWindow(window));
+        cancelButton.setStyleName(ValoTheme.BUTTON_DANGER);
         buttonsRow.addComponents(saveButton, cancelButton);
-        mine.addComponents(name,creditCheckBox, buttonsRow);
-        setCaption("Crating bank");
+        mine.addComponents(name, buttonsRow);
         window.setContent(mine);
         window.setModal(true);
         window.center();
         return window;
     }
 
-    private Window createWindowForDeleteBanks(List<Bank> selected)
+    private Window createWindowForDeleteBanks()
     {
         Window window = new Window();
         VerticalLayout main = new VerticalLayout();
@@ -199,13 +210,14 @@ public class BankPage extends VerticalLayout implements View, Serializable
             grid.setItems(bankService.getAll());
             getUI().removeWindow(window);
         });
-        Button negativeAnswer =
-                new Button(BankPageData.DELETE_WINDOW_NEGATIVE_ANSWER, clickEvent -> getUI().removeWindow(window));
+        positiveAnswer.setStyleName(ValoTheme.BUTTON_DANGER);;
+        Button negativeAnswer = new Button(BankPageData.DELETE_WINDOW_NEGATIVE_ANSWER, clickEvent -> getUI().removeWindow(window));
         answerButtons.addComponents(positiveAnswer, negativeAnswer);
         main.addComponents(question, answerButtons);
-        window.setContent(main);
         window.setModal(true);
+        window.setContent(main);
         window.center();
+        window.setWidth("35%");
         return window;
     }
 
